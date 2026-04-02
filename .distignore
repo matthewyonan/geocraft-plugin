@@ -10,5 +10,8 @@ composer.json
 composer.lock
 node_modules
 phpunit.xml
+README.md
 tests
 vendor
+.DS_Store
+*.log
