@@ -32,5 +32,8 @@ class Geocraft_Plugin_Activator {
 				)
 			);
 		}
+
+		require_once plugin_dir_path( __FILE__ ) . 'class-geocraft-analytics.php';
+		Geocraft_Analytics::schedule_cron();
 	}
 }
