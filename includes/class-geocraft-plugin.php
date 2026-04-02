@@ -45,8 +45,27 @@ class Geocraft_Plugin {
 	 * Constructor.
 	 */
 	private function __construct() {
+		$this->load_includes();
 		add_action( 'plugins_loaded', array( $this, 'load_textdomain' ) );
 		add_action( 'admin_init', array( $this, 'register_settings' ) );
+		if ( is_admin() ) {
+			new Geocraft_Settings();
+		}
+	}
+
+	/**
+	 * Require sub-system class files.
+	 *
+	 * @return void
+	 */
+	private function load_includes() {
+		$files = array(
+			'class-geocraft-api.php',
+			'class-geocraft-settings.php',
+		);
+		foreach ( $files as $file ) {
+			require_once __DIR__ . '/' . $file;
+		}
 	}
 
 	/**
@@ -71,8 +90,11 @@ class Geocraft_Plugin {
 				'type'              => 'array',
 				'sanitize_callback' => array( $this, 'sanitize_settings' ),
 				'default'           => array(
-					'api_base_url' => '',
-					'api_token'    => '',
+					'api_base_url'     => '',
+					'api_token'        => '',
+					'default_status'   => 'draft',
+					'default_author'   => 0,
+					'default_category' => 0,
 				),
 			)
 		);
@@ -88,9 +110,14 @@ class Geocraft_Plugin {
 	public function sanitize_settings( $settings ) {
 		$settings = is_array( $settings ) ? $settings : array();
 
+		$allowed_statuses = array( 'draft', 'publish' );
+
 		return array(
-			'api_base_url' => isset( $settings['api_base_url'] ) ? esc_url_raw( wp_unslash( $settings['api_base_url'] ) ) : '',
-			'api_token'    => isset( $settings['api_token'] ) ? sanitize_text_field( wp_unslash( $settings['api_token'] ) ) : '',
+			'api_base_url'     => isset( $settings['api_base_url'] ) ? esc_url_raw( wp_unslash( $settings['api_base_url'] ) ) : '',
+			'api_token'        => isset( $settings['api_token'] ) ? sanitize_text_field( wp_unslash( $settings['api_token'] ) ) : '',
+			'default_status'   => ( isset( $settings['default_status'] ) && in_array( $settings['default_status'], $allowed_statuses, true ) ) ? $settings['default_status'] : 'draft',
+			'default_author'   => isset( $settings['default_author'] ) ? absint( $settings['default_author'] ) : 0,
+			'default_category' => isset( $settings['default_category'] ) ? absint( $settings['default_category'] ) : 0,
 		);
 	}
 }
