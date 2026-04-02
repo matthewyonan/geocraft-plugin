@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<ruleset name="GeoCraft Plugin">
+	<description>PHPCS rules for GeoCraft WordPress plugin.</description>
+
+	<arg name="basepath" value="."/>
+	<arg name="extensions" value="php"/>
+	<arg name="parallel" value="4"/>
+	<arg value="sp"/>
+
+	<file>geocraft-plugin.php</file>
+	<file>includes</file>
+	<file>admin</file>
+	<file>tests</file>
+
+	<exclude-pattern>vendor/*</exclude-pattern>
+	<exclude-pattern>tests/phpunit/tmp/*</exclude-pattern>
+
+	<rule ref="WordPress-Core"/>
+	<rule ref="WordPress-Docs"/>
+	<rule ref="WordPress-Extra"/>
+</ruleset>

@@ -1,0 +1,96 @@
+<?php
+/**
+ * Main plugin runtime class.
+ *
+ * @package GeocraftPlugin
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+/**
+ * GeoCraft plugin runtime.
+ */
+class Geocraft_Plugin {
+
+	/**
+	 * Singleton instance.
+	 *
+	 * @var Geocraft_Plugin|null
+	 */
+	private static $instance = null;
+
+	/**
+	 * Option name for plugin settings.
+	 *
+	 * @var string
+	 */
+	private $option_name = 'geocraft_plugin_settings';
+
+	/**
+	 * Returns singleton instance.
+	 *
+	 * @return Geocraft_Plugin
+	 */
+	public static function instance() {
+		if ( null === self::$instance ) {
+			self::$instance = new self();
+		}
+
+		return self::$instance;
+	}
+
+	/**
+	 * Constructor.
+	 */
+	private function __construct() {
+		add_action( 'plugins_loaded', array( $this, 'load_textdomain' ) );
+		add_action( 'admin_init', array( $this, 'register_settings' ) );
+	}
+
+	/**
+	 * Loads translation files.
+	 *
+	 * @return void
+	 */
+	public function load_textdomain() {
+		load_plugin_textdomain( 'geocraft-plugin', false, dirname( plugin_basename( __FILE__ ) ) . '/../languages' );
+	}
+
+	/**
+	 * Registers plugin settings.
+	 *
+	 * @return void
+	 */
+	public function register_settings() {
+		register_setting(
+			'geocraft_plugin',
+			$this->option_name,
+			array(
+				'type'              => 'array',
+				'sanitize_callback' => array( $this, 'sanitize_settings' ),
+				'default'           => array(
+					'api_base_url' => '',
+					'api_token'    => '',
+				),
+			)
+		);
+	}
+
+	/**
+	 * Sanitizes plugin settings.
+	 *
+	 * @param array<string, mixed> $settings Raw submitted settings.
+	 *
+	 * @return array<string, string>
+	 */
+	public function sanitize_settings( $settings ) {
+		$settings = is_array( $settings ) ? $settings : array();
+
+		return array(
+			'api_base_url' => isset( $settings['api_base_url'] ) ? esc_url_raw( wp_unslash( $settings['api_base_url'] ) ) : '',
+			'api_token'    => isset( $settings['api_token'] ) ? sanitize_text_field( wp_unslash( $settings['api_token'] ) ) : '',
+		);
+	}
+}

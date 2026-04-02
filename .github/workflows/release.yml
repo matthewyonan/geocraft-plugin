@@ -1,0 +1,56 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  package:
+    name: Build Zip
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          tools: composer:v2
+
+      - name: Install dependencies
+        run: composer install --no-dev --no-interaction --prefer-dist
+
+      - name: Build plugin zip
+        run: |
+          mkdir -p dist
+          zip -r "dist/geocraft-plugin-${GITHUB_REF_NAME}.zip" . \
+            -x '*.git*' \
+            -x 'tests/*' \
+            -x 'vendor/bin/*' \
+            -x 'dist/*'
+
+      - name: Upload release artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: geocraft-plugin-${{ github.ref_name }}
+          path: dist/*.zip
+
+  deploy-wordpress-org:
+    name: Deploy to WordPress.org
+    needs: package
+    runs-on: ubuntu-latest
+    if: ${{ secrets.SVN_USERNAME != '' && secrets.SVN_PASSWORD != '' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Deploy plugin
+        uses: 10up/action-wordpress-plugin-deploy@stable
+        env:
+          SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
+          SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
+          SLUG: geocraft-plugin
