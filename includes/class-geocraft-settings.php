@@ -140,10 +140,10 @@ class Geocraft_Settings {
 			wp_die( esc_html__( 'You do not have permission to access this page.', 'geocraft' ) );
 		}
 
-		$settings          = $this->get_settings();
-		$taxonomy_mappings = $this->get_taxonomy_mappings();
-		$authors           = get_users( array( 'capability' => 'publish_posts', 'fields' => array( 'ID', 'display_name' ) ) );
-		$categories        = get_categories( array( 'hide_empty' => false ) );
+		$geocraft_settings          = $this->get_settings();
+		$geocraft_taxonomy_mappings = $this->get_taxonomy_mappings();
+		$geocraft_authors           = get_users( array( 'capability' => 'publish_posts', 'fields' => array( 'ID', 'display_name' ) ) );
+		$geocraft_categories        = get_categories( array( 'hide_empty' => false ) );
 
 		include dirname( __FILE__, 2 ) . '/admin/views/settings-page.php';
 	}
