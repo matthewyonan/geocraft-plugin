@@ -24,8 +24,11 @@ class Geocraft_Plugin_Activator {
 			add_option(
 				'geocraft_plugin_settings',
 				array(
-					'api_base_url' => '',
-					'api_token'    => '',
+					'api_base_url'     => '',
+					'api_token'        => '',
+					'default_status'   => 'draft',
+					'default_author'   => 0,
+					'default_category' => 0,
 				)
 			);
 		}
