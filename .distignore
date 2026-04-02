@@ -6,9 +6,6 @@
 .phpcs.xml
 .agents
 .wordpress-org
-composer.json
-composer.lock
 node_modules
-phpunit.xml
-tests
 vendor
+README.md
