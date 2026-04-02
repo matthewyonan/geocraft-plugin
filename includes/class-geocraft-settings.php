@@ -58,8 +58,8 @@ class Geocraft_Settings {
 	 */
 	public function register_menu() {
 		add_options_page(
-			__( 'GeoCraft Settings', 'geocraft-plugin' ),
-			__( 'GeoCraft', 'geocraft-plugin' ),
+			__( 'GeoCraft Settings', 'geocraft' ),
+			__( 'GeoCraft', 'geocraft' ),
 			'manage_options',
 			self::PAGE_SLUG,
 			array( $this, 'render_page' )
@@ -115,12 +115,12 @@ class Geocraft_Settings {
 				'fetchCatNonce'  => wp_create_nonce( self::FETCH_CATEGORIES_NONCE_ACTION ),
 				'wpCategories'   => $wp_categories,
 				'i18n'           => array(
-					'testing'    => __( 'Testing…', 'geocraft-plugin' ),
-					'success'    => __( 'Connection successful!', 'geocraft-plugin' ),
-					'error'      => __( 'Connection failed.', 'geocraft-plugin' ),
-					'loading'    => __( 'Loading…', 'geocraft-plugin' ),
-					'loadError'  => __( 'Failed to load GeoCraft categories.', 'geocraft-plugin' ),
-					'remove'     => __( 'Remove', 'geocraft-plugin' ),
+					'testing'    => __( 'Testing…', 'geocraft' ),
+					'success'    => __( 'Connection successful!', 'geocraft' ),
+					'error'      => __( 'Connection failed.', 'geocraft' ),
+					'loading'    => __( 'Loading…', 'geocraft' ),
+					'loadError'  => __( 'Failed to load GeoCraft categories.', 'geocraft' ),
+					'remove'     => __( 'Remove', 'geocraft' ),
 				),
 			)
 		);
@@ -137,7 +137,7 @@ class Geocraft_Settings {
 	 */
 	public function render_page() {
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( esc_html__( 'You do not have permission to access this page.', 'geocraft-plugin' ) );
+			wp_die( esc_html__( 'You do not have permission to access this page.', 'geocraft' ) );
 		}
 
 		$settings          = $this->get_settings();
@@ -159,7 +159,7 @@ class Geocraft_Settings {
 	 */
 	public function handle_save() {
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( esc_html__( 'You do not have permission to perform this action.', 'geocraft-plugin' ) );
+			wp_die( esc_html__( 'You do not have permission to perform this action.', 'geocraft' ) );
 		}
 
 		check_admin_referer( self::NONCE_ACTION, self::NONCE_FIELD );
@@ -255,7 +255,7 @@ class Geocraft_Settings {
 		check_ajax_referer( self::TEST_NONCE_ACTION, 'nonce' );
 
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_send_json_error( array( 'message' => __( 'Permission denied.', 'geocraft-plugin' ) ), 403 );
+			wp_send_json_error( array( 'message' => __( 'Permission denied.', 'geocraft' ) ), 403 );
 		}
 
 		$api    = new Geocraft_API();
@@ -265,7 +265,7 @@ class Geocraft_Settings {
 			wp_send_json_error( array( 'message' => $result->get_error_message() ) );
 		}
 
-		wp_send_json_success( array( 'message' => __( 'Connection successful!', 'geocraft-plugin' ) ) );
+		wp_send_json_success( array( 'message' => __( 'Connection successful!', 'geocraft' ) ) );
 	}
 
 	/**
@@ -277,7 +277,7 @@ class Geocraft_Settings {
 		check_ajax_referer( self::FETCH_CATEGORIES_NONCE_ACTION, 'nonce' );
 
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_send_json_error( array( 'message' => __( 'Permission denied.', 'geocraft-plugin' ) ), 403 );
+			wp_send_json_error( array( 'message' => __( 'Permission denied.', 'geocraft' ) ), 403 );
 		}
 
 		$api    = new Geocraft_API();

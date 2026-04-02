@@ -149,7 +149,7 @@ class Geocraft_API {
 				'geocraft_request_failed',
 				sprintf(
 					/* translators: %s: underlying error message */
-					__( 'GeoCraft API request failed: %s', 'geocraft-plugin' ),
+					__( 'GeoCraft API request failed: %s', 'geocraft' ),
 					$response->get_error_message()
 				)
 			);
@@ -165,7 +165,7 @@ class Geocraft_API {
 				'geocraft_api_error',
 				sprintf(
 					/* translators: 1: HTTP status code 2: error detail */
-					__( 'GeoCraft API returned HTTP %1$d: %2$s', 'geocraft-plugin' ),
+					__( 'GeoCraft API returned HTTP %1$d: %2$s', 'geocraft' ),
 					$status_code,
 					$message
 				)
@@ -175,7 +175,7 @@ class Geocraft_API {
 		if ( null === $decoded && JSON_ERROR_NONE !== json_last_error() ) {
 			return new WP_Error(
 				'geocraft_invalid_response',
-				__( 'GeoCraft API returned an invalid JSON response.', 'geocraft-plugin' )
+				__( 'GeoCraft API returned an invalid JSON response.', 'geocraft' )
 			);
 		}
 

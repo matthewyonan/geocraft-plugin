@@ -7,7 +7,7 @@
 	<arg name="parallel" value="4"/>
 	<arg value="sp"/>
 
-	<file>geocraft-plugin.php</file>
+	<file>geocraft.php</file>
 	<file>includes</file>
 	<file>admin</file>
 	<file>tests</file>

@@ -27,7 +27,7 @@ Features:
 
 == Installation ==
 
-1. Upload the plugin files to the `/wp-content/plugins/geocraft-plugin` directory, or install through the WordPress plugin screen.
+1. Upload the plugin files to the `/wp-content/plugins/geocraft` directory, or install through the WordPress plugin screen.
 2. Activate the plugin through the "Plugins" screen in WordPress.
 3. Go to Settings > GeoCraft and enter your API key from your GeoCraft dashboard.
 4. Configure default post status, author, and category preferences.

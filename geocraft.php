@@ -8,7 +8,7 @@
  * Requires PHP:      8.0
  * Author:            GeoCraft
  * Author URI:        https://geocraft.ai
- * Text Domain:       geocraft-plugin
+ * Text Domain:       geocraft
  * Domain Path:       /languages
  * License:           GPL-2.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html

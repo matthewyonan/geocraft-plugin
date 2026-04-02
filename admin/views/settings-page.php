@@ -15,11 +15,11 @@ defined( 'ABSPATH' ) || exit;
 $has_token = ! empty( $settings['api_token'] );
 ?>
 <div class="wrap geocraft-settings">
-	<h1><?php esc_html_e( 'GeoCraft Settings', 'geocraft-plugin' ); ?></h1>
+	<h1><?php esc_html_e( 'GeoCraft Settings', 'geocraft' ); ?></h1>
 
 	<?php if ( isset( $_GET['updated'] ) && '1' === $_GET['updated'] ) : // phpcs:ignore WordPress.Security.NonceVerification.Recommended ?>
 		<div class="notice notice-success is-dismissible">
-			<p><?php esc_html_e( 'Settings saved.', 'geocraft-plugin' ); ?></p>
+			<p><?php esc_html_e( 'Settings saved.', 'geocraft' ); ?></p>
 		</div>
 	<?php endif; ?>
 
@@ -32,7 +32,7 @@ $has_token = ! empty( $settings['api_token'] );
 			<!-- API Base URL -->
 			<tr>
 				<th scope="row">
-					<label for="geocraft-api-base-url"><?php esc_html_e( 'API Base URL', 'geocraft-plugin' ); ?></label>
+					<label for="geocraft-api-base-url"><?php esc_html_e( 'API Base URL', 'geocraft' ); ?></label>
 				</th>
 				<td>
 					<input
@@ -44,7 +44,7 @@ $has_token = ! empty( $settings['api_token'] );
 						placeholder="https://api.geocraft.ai/v1"
 					>
 					<p class="description">
-						<?php esc_html_e( 'Leave blank to use the default GeoCraft API endpoint.', 'geocraft-plugin' ); ?>
+						<?php esc_html_e( 'Leave blank to use the default GeoCraft API endpoint.', 'geocraft' ); ?>
 					</p>
 				</td>
 			</tr>
@@ -52,7 +52,7 @@ $has_token = ! empty( $settings['api_token'] );
 			<!-- API Token -->
 			<tr>
 				<th scope="row">
-					<label for="geocraft-api-token"><?php esc_html_e( 'API Key', 'geocraft-plugin' ); ?></label>
+					<label for="geocraft-api-token"><?php esc_html_e( 'API Key', 'geocraft' ); ?></label>
 				</th>
 				<td>
 					<input
@@ -66,11 +66,11 @@ $has_token = ! empty( $settings['api_token'] );
 					<?php if ( $has_token ) : ?>
 						<p class="description geocraft-key-stored">
 							<span class="dashicons dashicons-yes-alt" aria-hidden="true"></span>
-							<?php esc_html_e( 'An API key is stored. Enter a new value to replace it.', 'geocraft-plugin' ); ?>
+							<?php esc_html_e( 'An API key is stored. Enter a new value to replace it.', 'geocraft' ); ?>
 						</p>
 					<?php else : ?>
 						<p class="description">
-							<?php esc_html_e( 'Enter the API key from your GeoCraft account dashboard.', 'geocraft-plugin' ); ?>
+							<?php esc_html_e( 'Enter the API key from your GeoCraft account dashboard.', 'geocraft' ); ?>
 						</p>
 					<?php endif; ?>
 
@@ -80,7 +80,7 @@ $has_token = ! empty( $settings['api_token'] );
 						class="button button-secondary geocraft-test-btn"
 						<?php disabled( ! $has_token ); ?>
 					>
-						<?php esc_html_e( 'Test Connection', 'geocraft-plugin' ); ?>
+						<?php esc_html_e( 'Test Connection', 'geocraft' ); ?>
 					</button>
 					<span id="geocraft-test-result" class="geocraft-test-result" aria-live="polite"></span>
 				</td>
@@ -89,19 +89,19 @@ $has_token = ! empty( $settings['api_token'] );
 			<!-- Default Post Status -->
 			<tr>
 				<th scope="row">
-					<label for="geocraft-default-status"><?php esc_html_e( 'Default Post Status', 'geocraft-plugin' ); ?></label>
+					<label for="geocraft-default-status"><?php esc_html_e( 'Default Post Status', 'geocraft' ); ?></label>
 				</th>
 				<td>
 					<select id="geocraft-default-status" name="geocraft_default_status">
 						<option value="draft" <?php selected( $settings['default_status'], 'draft' ); ?>>
-							<?php esc_html_e( 'Draft', 'geocraft-plugin' ); ?>
+							<?php esc_html_e( 'Draft', 'geocraft' ); ?>
 						</option>
 						<option value="publish" <?php selected( $settings['default_status'], 'publish' ); ?>>
-							<?php esc_html_e( 'Published', 'geocraft-plugin' ); ?>
+							<?php esc_html_e( 'Published', 'geocraft' ); ?>
 						</option>
 					</select>
 					<p class="description">
-						<?php esc_html_e( 'Status applied when GeoCraft publishes a new post to this site.', 'geocraft-plugin' ); ?>
+						<?php esc_html_e( 'Status applied when GeoCraft publishes a new post to this site.', 'geocraft' ); ?>
 					</p>
 				</td>
 			</tr>
@@ -109,11 +109,11 @@ $has_token = ! empty( $settings['api_token'] );
 			<!-- Default Author -->
 			<tr>
 				<th scope="row">
-					<label for="geocraft-default-author"><?php esc_html_e( 'Default Author', 'geocraft-plugin' ); ?></label>
+					<label for="geocraft-default-author"><?php esc_html_e( 'Default Author', 'geocraft' ); ?></label>
 				</th>
 				<td>
 					<select id="geocraft-default-author" name="geocraft_default_author">
-						<option value="0"><?php esc_html_e( '— Select author —', 'geocraft-plugin' ); ?></option>
+						<option value="0"><?php esc_html_e( '— Select author —', 'geocraft' ); ?></option>
 						<?php foreach ( $authors as $author ) : ?>
 							<option value="<?php echo absint( $author->ID ); ?>" <?php selected( (int) $settings['default_author'], (int) $author->ID ); ?>>
 								<?php echo esc_html( $author->display_name ); ?>
@@ -121,7 +121,7 @@ $has_token = ! empty( $settings['api_token'] );
 						<?php endforeach; ?>
 					</select>
 					<p class="description">
-						<?php esc_html_e( 'WordPress user assigned as the author of posts published by GeoCraft.', 'geocraft-plugin' ); ?>
+						<?php esc_html_e( 'WordPress user assigned as the author of posts published by GeoCraft.', 'geocraft' ); ?>
 					</p>
 				</td>
 			</tr>
@@ -129,11 +129,11 @@ $has_token = ! empty( $settings['api_token'] );
 			<!-- Default Category -->
 			<tr>
 				<th scope="row">
-					<label for="geocraft-default-category"><?php esc_html_e( 'Default Category', 'geocraft-plugin' ); ?></label>
+					<label for="geocraft-default-category"><?php esc_html_e( 'Default Category', 'geocraft' ); ?></label>
 				</th>
 				<td>
 					<select id="geocraft-default-category" name="geocraft_default_category">
-						<option value="0"><?php esc_html_e( '— Select category —', 'geocraft-plugin' ); ?></option>
+						<option value="0"><?php esc_html_e( '— Select category —', 'geocraft' ); ?></option>
 						<?php foreach ( $categories as $category ) : ?>
 							<option value="<?php echo absint( $category->term_id ); ?>" <?php selected( (int) $settings['default_category'], (int) $category->term_id ); ?>>
 								<?php echo esc_html( $category->name ); ?>
@@ -141,20 +141,20 @@ $has_token = ! empty( $settings['api_token'] );
 						<?php endforeach; ?>
 					</select>
 					<p class="description">
-						<?php esc_html_e( 'Category applied to posts published by GeoCraft when no specific category is provided.', 'geocraft-plugin' ); ?>
+						<?php esc_html_e( 'Category applied to posts published by GeoCraft when no specific category is provided.', 'geocraft' ); ?>
 					</p>
 				</td>
 			</tr>
 
 		</table>
 
-		<h2 class="title"><?php esc_html_e( 'Taxonomy Mapping', 'geocraft-plugin' ); ?></h2>
-		<p><?php esc_html_e( 'Map GeoCraft content categories to WordPress categories and set default tags per content type. Applied when a publish request does not include explicit categories or tags.', 'geocraft-plugin' ); ?></p>
+		<h2 class="title"><?php esc_html_e( 'Taxonomy Mapping', 'geocraft' ); ?></h2>
+		<p><?php esc_html_e( 'Map GeoCraft content categories to WordPress categories and set default tags per content type. Applied when a publish request does not include explicit categories or tags.', 'geocraft' ); ?></p>
 
-		<h3><?php esc_html_e( 'Category Mappings', 'geocraft-plugin' ); ?></h3>
+		<h3><?php esc_html_e( 'Category Mappings', 'geocraft' ); ?></h3>
 		<p>
 			<button type="button" id="geocraft-load-categories" class="button button-secondary">
-				<?php esc_html_e( 'Load GeoCraft Categories', 'geocraft-plugin' ); ?>
+				<?php esc_html_e( 'Load GeoCraft Categories', 'geocraft' ); ?>
 			</button>
 			<span id="geocraft-load-cats-result" class="geocraft-test-result" aria-live="polite"></span>
 		</p>
@@ -162,9 +162,9 @@ $has_token = ! empty( $settings['api_token'] );
 		<table id="geocraft-category-map-table" class="wp-list-table widefat fixed striped geocraft-mapping-table">
 			<thead>
 				<tr>
-					<th><?php esc_html_e( 'GeoCraft Category', 'geocraft-plugin' ); ?></th>
-					<th><?php esc_html_e( 'WordPress Category', 'geocraft-plugin' ); ?></th>
-					<th><?php esc_html_e( 'Auto-Create if Missing', 'geocraft-plugin' ); ?></th>
+					<th><?php esc_html_e( 'GeoCraft Category', 'geocraft' ); ?></th>
+					<th><?php esc_html_e( 'WordPress Category', 'geocraft' ); ?></th>
+					<th><?php esc_html_e( 'Auto-Create if Missing', 'geocraft' ); ?></th>
 					<th></th>
 				</tr>
 			</thead>
@@ -181,7 +181,7 @@ $has_token = ! empty( $settings['api_token'] );
 						</td>
 						<td>
 							<select name="geocraft_category_map[<?php echo esc_attr( $geo_cat ); ?>][wp_term_id]">
-								<option value="0"><?php esc_html_e( '— Select category —', 'geocraft-plugin' ); ?></option>
+								<option value="0"><?php esc_html_e( '— Select category —', 'geocraft' ); ?></option>
 								<?php foreach ( $categories as $category ) : ?>
 									<option value="<?php echo absint( $category->term_id ); ?>" <?php selected( (int) ( $entry['wp_term_id'] ?? 0 ), (int) $category->term_id ); ?>>
 										<?php echo esc_html( $category->name ); ?>
@@ -199,7 +199,7 @@ $has_token = ! empty( $settings['api_token'] );
 						</td>
 						<td>
 							<button type="button" class="button button-small geocraft-remove-row">
-								<?php esc_html_e( 'Remove', 'geocraft-plugin' ); ?>
+								<?php esc_html_e( 'Remove', 'geocraft' ); ?>
 							</button>
 						</td>
 					</tr>
@@ -207,19 +207,19 @@ $has_token = ! empty( $settings['api_token'] );
 			</tbody>
 		</table>
 		<button type="button" id="geocraft-add-cat-row" class="button button-secondary geocraft-add-row" style="margin-top:8px;">
-			<?php esc_html_e( 'Add Row', 'geocraft-plugin' ); ?>
+			<?php esc_html_e( 'Add Row', 'geocraft' ); ?>
 		</button>
 
-		<h3 style="margin-top:24px;"><?php esc_html_e( 'Default Tags by Content Type', 'geocraft-plugin' ); ?></h3>
+		<h3 style="margin-top:24px;"><?php esc_html_e( 'Default Tags by Content Type', 'geocraft' ); ?></h3>
 		<p class="description">
-			<?php esc_html_e( 'Comma-separated tags applied when a published post matches the given content type and no tags are provided in the payload.', 'geocraft-plugin' ); ?>
+			<?php esc_html_e( 'Comma-separated tags applied when a published post matches the given content type and no tags are provided in the payload.', 'geocraft' ); ?>
 		</p>
 
 		<table id="geocraft-content-type-tags-table" class="wp-list-table widefat fixed striped geocraft-mapping-table">
 			<thead>
 				<tr>
-					<th><?php esc_html_e( 'Content Type', 'geocraft-plugin' ); ?></th>
-					<th><?php esc_html_e( 'Default Tags (comma-separated)', 'geocraft-plugin' ); ?></th>
+					<th><?php esc_html_e( 'Content Type', 'geocraft' ); ?></th>
+					<th><?php esc_html_e( 'Default Tags (comma-separated)', 'geocraft' ); ?></th>
 					<th></th>
 				</tr>
 			</thead>
@@ -232,7 +232,7 @@ $has_token = ! empty( $settings['api_token'] );
 								name="geocraft_content_type[<?php echo esc_attr( $type ); ?>][type]"
 								value="<?php echo esc_attr( $type ); ?>"
 								class="regular-text"
-								placeholder="<?php esc_attr_e( 'e.g. blog_post', 'geocraft-plugin' ); ?>"
+								placeholder="<?php esc_attr_e( 'e.g. blog_post', 'geocraft' ); ?>"
 							>
 						</td>
 						<td>
@@ -241,12 +241,12 @@ $has_token = ! empty( $settings['api_token'] );
 								name="geocraft_content_type[<?php echo esc_attr( $type ); ?>][tags]"
 								value="<?php echo esc_attr( $tags_str ); ?>"
 								class="large-text"
-								placeholder="<?php esc_attr_e( 'e.g. news, featured', 'geocraft-plugin' ); ?>"
+								placeholder="<?php esc_attr_e( 'e.g. news, featured', 'geocraft' ); ?>"
 							>
 						</td>
 						<td>
 							<button type="button" class="button button-small geocraft-remove-row">
-								<?php esc_html_e( 'Remove', 'geocraft-plugin' ); ?>
+								<?php esc_html_e( 'Remove', 'geocraft' ); ?>
 							</button>
 						</td>
 					</tr>
@@ -254,9 +254,9 @@ $has_token = ! empty( $settings['api_token'] );
 			</tbody>
 		</table>
 		<button type="button" id="geocraft-add-tag-row" class="button button-secondary geocraft-add-row" style="margin-top:8px;">
-			<?php esc_html_e( 'Add Row', 'geocraft-plugin' ); ?>
+			<?php esc_html_e( 'Add Row', 'geocraft' ); ?>
 		</button>
 
-		<?php submit_button( __( 'Save Settings', 'geocraft-plugin' ) ); ?>
+		<?php submit_button( __( 'Save Settings', 'geocraft' ) ); ?>
 	</form>
 </div>

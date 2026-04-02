@@ -239,7 +239,7 @@ class Geocraft_Analytics {
 
 		wp_add_dashboard_widget(
 			'geocraft_analytics_widget',
-			__( 'GeoCraft Analytics', 'geocraft-plugin' ),
+			__( 'GeoCraft Analytics', 'geocraft' ),
 			array( $this, 'render_dashboard_widget' )
 		);
 	}
@@ -257,14 +257,14 @@ class Geocraft_Analytics {
 		$stats = get_option( self::STATS_OPTION, array() );
 
 		if ( empty( $stats ) ) {
-			echo '<p>' . esc_html__( 'No analytics data collected yet.', 'geocraft-plugin' ) . '</p>';
+			echo '<p>' . esc_html__( 'No analytics data collected yet.', 'geocraft' ) . '</p>';
 		} else {
 			echo '<table class="widefat striped geocraft-analytics-table">';
 			echo '<thead><tr>';
-			echo '<th>' . esc_html__( 'Post', 'geocraft-plugin' ) . '</th>';
-			echo '<th style="text-align:right">' . esc_html__( 'Pageviews', 'geocraft-plugin' ) . '</th>';
-			echo '<th style="text-align:right">' . esc_html__( 'Avg. Time (s)', 'geocraft-plugin' ) . '</th>';
-			echo '<th style="text-align:right">' . esc_html__( 'Bounces', 'geocraft-plugin' ) . '</th>';
+			echo '<th>' . esc_html__( 'Post', 'geocraft' ) . '</th>';
+			echo '<th style="text-align:right">' . esc_html__( 'Pageviews', 'geocraft' ) . '</th>';
+			echo '<th style="text-align:right">' . esc_html__( 'Avg. Time (s)', 'geocraft' ) . '</th>';
+			echo '<th style="text-align:right">' . esc_html__( 'Bounces', 'geocraft' ) . '</th>';
 			echo '</tr></thead><tbody>';
 
 			foreach ( $stats as $wp_post_id => $stat ) {
@@ -293,7 +293,7 @@ class Geocraft_Analytics {
 			echo '<p class="description" style="margin-top:8px">' .
 				sprintf(
 					/* translators: %s: human-readable time until next sync */
-					esc_html__( 'Next sync to GeoCraft: %s', 'geocraft-plugin' ),
+					esc_html__( 'Next sync to GeoCraft: %s', 'geocraft' ),
 					esc_html( human_time_diff( time(), $next_send ) )
 				) .
 				'</p>';
@@ -304,7 +304,7 @@ class Geocraft_Analytics {
 			echo '<p class="description">' .
 				sprintf(
 					/* translators: %d: number of pending events */
-					esc_html__( '%d event(s) pending sync.', 'geocraft-plugin' ),
+					esc_html__( '%d event(s) pending sync.', 'geocraft' ),
 					absint( $pending )
 				) .
 				'</p>';

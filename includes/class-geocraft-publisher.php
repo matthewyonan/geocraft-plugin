@@ -86,7 +86,7 @@ class Geocraft_Publisher {
 		if ( '' === $api_key ) {
 			return new WP_Error(
 				'geocraft_auth_not_configured',
-				__( 'GeoCraft API key is not configured.', 'geocraft-plugin' ),
+				__( 'GeoCraft API key is not configured.', 'geocraft' ),
 				array( 'status' => 500 )
 			);
 		}
@@ -95,7 +95,7 @@ class Geocraft_Publisher {
 		if ( ! $this->is_valid_authorization_header( $auth_header, $api_key ) ) {
 			return new WP_Error(
 				'geocraft_invalid_api_key',
-				__( 'Invalid Authorization header.', 'geocraft-plugin' ),
+				__( 'Invalid Authorization header.', 'geocraft' ),
 				array( 'status' => 401 )
 			);
 		}
@@ -106,7 +106,7 @@ class Geocraft_Publisher {
 		if ( ! $this->is_valid_signature( $signature_header, $raw_body, $api_key ) ) {
 			return new WP_Error(
 				'geocraft_invalid_signature',
-				__( 'Invalid webhook signature.', 'geocraft-plugin' ),
+				__( 'Invalid webhook signature.', 'geocraft' ),
 				array( 'status' => 401 )
 			);
 		}
@@ -125,7 +125,7 @@ class Geocraft_Publisher {
 		if ( ! is_array( $payload ) ) {
 			return new WP_Error(
 				'geocraft_invalid_payload',
-				__( 'Request body must be valid JSON.', 'geocraft-plugin' ),
+				__( 'Request body must be valid JSON.', 'geocraft' ),
 				array( 'status' => 400 )
 			);
 		}
@@ -153,7 +153,7 @@ class Geocraft_Publisher {
 		if ( ! is_array( $payloads ) ) {
 			return new WP_Error(
 				'geocraft_invalid_payload',
-				__( 'Request body must be a JSON array of post payloads.', 'geocraft-plugin' ),
+				__( 'Request body must be a JSON array of post payloads.', 'geocraft' ),
 				array( 'status' => 400 )
 			);
 		}
@@ -162,7 +162,7 @@ class Geocraft_Publisher {
 		if ( ! empty( $payloads ) && ! isset( $payloads[0] ) ) {
 			return new WP_Error(
 				'geocraft_invalid_payload',
-				__( 'Request body must be a JSON array of post payloads.', 'geocraft-plugin' ),
+				__( 'Request body must be a JSON array of post payloads.', 'geocraft' ),
 				array( 'status' => 400 )
 			);
 		}
@@ -172,7 +172,7 @@ class Geocraft_Publisher {
 				'geocraft_bulk_limit_exceeded',
 				sprintf(
 					/* translators: %d: maximum allowed items */
-					__( 'Bulk request exceeds the maximum of %d posts per request.', 'geocraft-plugin' ),
+					__( 'Bulk request exceeds the maximum of %d posts per request.', 'geocraft' ),
 					self::BULK_MAX_ITEMS
 				),
 				array( 'status' => 400 )
@@ -187,7 +187,7 @@ class Geocraft_Publisher {
 					'success' => false,
 					'error'   => array(
 						'code'    => 'geocraft_invalid_item',
-						'message' => __( 'Each item must be a JSON object.', 'geocraft-plugin' ),
+						'message' => __( 'Each item must be a JSON object.', 'geocraft' ),
 					),
 				);
 				continue;
@@ -245,7 +245,7 @@ class Geocraft_Publisher {
 				'geocraft_publish_failed',
 				sprintf(
 					/* translators: %s: error message */
-					__( 'Post publish failed: %s', 'geocraft-plugin' ),
+					__( 'Post publish failed: %s', 'geocraft' ),
 					$result->get_error_message()
 				),
 				array( 'status' => 500 )
@@ -321,7 +321,7 @@ class Geocraft_Publisher {
 		if ( '' === $title || '' === $body ) {
 			return new WP_Error(
 				'geocraft_missing_required_fields',
-				__( 'Both title and body are required.', 'geocraft-plugin' ),
+				__( 'Both title and body are required.', 'geocraft' ),
 				array( 'status' => 400 )
 			);
 		}
@@ -330,7 +330,7 @@ class Geocraft_Publisher {
 		if ( '' === $status ) {
 			return new WP_Error(
 				'geocraft_invalid_status',
-				__( 'Invalid post status provided.', 'geocraft-plugin' ),
+				__( 'Invalid post status provided.', 'geocraft' ),
 				array( 'status' => 400 )
 			);
 		}
@@ -500,7 +500,7 @@ class Geocraft_Publisher {
 		if ( false === $timestamp ) {
 			return new WP_Error(
 				'geocraft_invalid_publish_date',
-				__( 'publish_date is invalid.', 'geocraft-plugin' ),
+				__( 'publish_date is invalid.', 'geocraft' ),
 				array( 'status' => 400 )
 			);
 		}
@@ -659,7 +659,7 @@ class Geocraft_Publisher {
 		if ( '' === $image_url ) {
 			return new WP_Error(
 				'geocraft_invalid_featured_image_url',
-				__( 'featured_image_url is invalid.', 'geocraft-plugin' ),
+				__( 'featured_image_url is invalid.', 'geocraft' ),
 				array( 'status' => 400 )
 			);
 		}
@@ -680,7 +680,7 @@ class Geocraft_Publisher {
 				'geocraft_featured_image_download_failed',
 				sprintf(
 					/* translators: %s: error message */
-					__( 'Unable to download featured image: %s', 'geocraft-plugin' ),
+					__( 'Unable to download featured image: %s', 'geocraft' ),
 					$temp_file->get_error_message()
 				),
 				array( 'status' => 400 )
@@ -699,7 +699,7 @@ class Geocraft_Publisher {
 				'geocraft_featured_image_attach_failed',
 				sprintf(
 					/* translators: %s: error message */
-					__( 'Unable to attach featured image: %s', 'geocraft-plugin' ),
+					__( 'Unable to attach featured image: %s', 'geocraft' ),
 					$attachment_id->get_error_message()
 				),
 				array( 'status' => 500 )
