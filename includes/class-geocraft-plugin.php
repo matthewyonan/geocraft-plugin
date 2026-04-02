@@ -66,6 +66,7 @@ class Geocraft_Plugin {
 			'class-geocraft-publisher.php',
 			'class-geocraft-settings.php',
 			'class-geocraft-analytics.php',
+			'class-geocraft-seo.php',
 		);
 		foreach ( $files as $file ) {
 			require_once __DIR__ . '/' . $file;

@@ -159,6 +159,20 @@ class Geocraft_Publisher {
 			}
 		}
 
+		// Apply SEO meta fields if any are present in payload.
+		$seo_fields = array( 'seo_title', 'seo_description', 'seo_keywords', 'schema_markup' );
+		$has_seo    = false;
+		foreach ( $seo_fields as $field ) {
+			if ( ! empty( $payload[ $field ] ) ) {
+				$has_seo = true;
+				break;
+			}
+		}
+		if ( $has_seo ) {
+			$seo = new Geocraft_SEO();
+			$seo->apply_seo_meta( $wp_post_id, $payload );
+		}
+
 		$response = new WP_REST_Response(
 			array(
 				'post_id'   => $wp_post_id,
