@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name:       GeoCraft Plugin
+ * Plugin Name:       GeoCraft
  * Plugin URI:        https://geocraft.ai
  * Description:       WordPress integration for GeoCraft AI GEO-optimized content publishing and analytics.
  * Version:           0.1.0

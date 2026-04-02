@@ -688,13 +688,13 @@ class Geocraft_Publisher {
 		}
 
 		$file_array = array(
-			'name'     => wp_basename( parse_url( $image_url, PHP_URL_PATH ) ?: 'featured-image' ),
+			'name'     => wp_basename( wp_parse_url( $image_url, PHP_URL_PATH ) ?: 'featured-image' ),
 			'tmp_name' => $temp_file,
 		);
 
 		$attachment_id = media_handle_sideload( $file_array, $post_id );
 		if ( is_wp_error( $attachment_id ) ) {
-			@unlink( $temp_file ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+			wp_delete_file( $temp_file );
 			return new WP_Error(
 				'geocraft_featured_image_attach_failed',
 				sprintf(

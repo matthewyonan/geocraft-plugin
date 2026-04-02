@@ -1,0 +1,14 @@
+# Files to exclude from plugin distribution packages.
+.distignore
+.git
+.github
+.gitignore
+.phpcs.xml
+.agents
+.wordpress-org
+composer.json
+composer.lock
+node_modules
+phpunit.xml
+tests
+vendor
