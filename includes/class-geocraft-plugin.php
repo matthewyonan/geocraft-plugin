@@ -49,6 +49,7 @@ class Geocraft_Plugin {
 		add_action( 'plugins_loaded', array( $this, 'load_textdomain' ) );
 		add_action( 'admin_init', array( $this, 'register_settings' ) );
 		new Geocraft_Publisher();
+		new Geocraft_Analytics();
 		if ( is_admin() ) {
 			new Geocraft_Settings();
 		}
@@ -64,6 +65,8 @@ class Geocraft_Plugin {
 			'class-geocraft-api.php',
 			'class-geocraft-publisher.php',
 			'class-geocraft-settings.php',
+			'class-geocraft-analytics.php',
+			'class-geocraft-seo.php',
 		);
 		foreach ( $files as $file ) {
 			require_once __DIR__ . '/' . $file;

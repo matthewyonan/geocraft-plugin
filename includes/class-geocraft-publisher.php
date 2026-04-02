@@ -260,10 +260,20 @@ class Geocraft_Publisher {
 
 		if ( ! empty( $payload['categories'] ) ) {
 			$this->assign_categories( $wp_post_id, $payload['categories'] );
+		} else {
+			$geo_category = isset( $payload['geocraft_category'] ) ? sanitize_text_field( (string) $payload['geocraft_category'] ) : '';
+			if ( '' !== $geo_category ) {
+				$this->apply_category_mapping( $wp_post_id, $geo_category );
+			}
 		}
 
 		if ( ! empty( $payload['tags'] ) ) {
 			$this->assign_tags( $wp_post_id, $payload['tags'] );
+		} else {
+			$content_type = isset( $payload['content_type'] ) ? sanitize_text_field( (string) $payload['content_type'] ) : '';
+			if ( '' !== $content_type ) {
+				$this->apply_content_type_tags( $wp_post_id, $content_type );
+			}
 		}
 
 		if ( ! empty( $payload['featured_image_url'] ) ) {
@@ -555,6 +565,73 @@ class Geocraft_Publisher {
 
 		if ( ! empty( $tag_names ) ) {
 			wp_set_post_terms( $post_id, $tag_names, 'post_tag', false );
+		}
+	}
+
+	/**
+	 * Apply configured category mapping for a GeoCraft category slug.
+	 *
+	 * Used when the publish payload omits explicit categories but provides
+	 * a geocraft_category field.
+	 *
+	 * @param int    $post_id      Post ID.
+	 * @param string $geo_category GeoCraft category name/slug.
+	 * @return void
+	 */
+	private function apply_category_mapping( $post_id, $geo_category ) {
+		$settings = new Geocraft_Settings();
+		$mappings = $settings->get_taxonomy_mappings();
+		$map      = $mappings['category_map'];
+
+		if ( empty( $map[ $geo_category ] ) ) {
+			return;
+		}
+
+		$entry      = $map[ $geo_category ];
+		$wp_term_id = absint( $entry['wp_term_id'] ?? 0 );
+		$auto_create = ! empty( $entry['auto_create'] );
+
+		if ( $wp_term_id > 0 ) {
+			wp_set_post_terms( $post_id, array( $wp_term_id ), 'category', false );
+			return;
+		}
+
+		if ( $auto_create ) {
+			$term = term_exists( $geo_category, 'category' );
+			if ( ! $term ) {
+				$term = wp_insert_term( $geo_category, 'category' );
+			}
+			if ( ! is_wp_error( $term ) ) {
+				$term_id = is_array( $term ) ? (int) $term['term_id'] : (int) $term;
+				if ( $term_id > 0 ) {
+					wp_set_post_terms( $post_id, array( $term_id ), 'category', false );
+				}
+			}
+		}
+	}
+
+	/**
+	 * Apply configured default tags for a content type.
+	 *
+	 * Used when the publish payload omits explicit tags but provides
+	 * a content_type field.
+	 *
+	 * @param int    $post_id      Post ID.
+	 * @param string $content_type Content type key (e.g. 'blog_post').
+	 * @return void
+	 */
+	private function apply_content_type_tags( $post_id, $content_type ) {
+		$settings = new Geocraft_Settings();
+		$mappings = $settings->get_taxonomy_mappings();
+		$tag_map  = $mappings['content_type_tags'];
+
+		if ( empty( $tag_map[ $content_type ] ) ) {
+			return;
+		}
+
+		$tags = array_filter( array_map( 'trim', explode( ',', $tag_map[ $content_type ] ) ) );
+		if ( ! empty( $tags ) ) {
+			wp_set_post_terms( $post_id, array_values( $tags ), 'post_tag', false );
 		}
 	}
 

@@ -30,6 +30,12 @@ class Geocraft_Settings {
 	/** Nonce action for the AJAX connection-test. */
 	const TEST_NONCE_ACTION = 'geocraft_test_connection';
 
+	/** Option name for taxonomy mappings. */
+	const TAXONOMY_OPTION_KEY = 'geocraft_taxonomy_mappings';
+
+	/** Nonce action for the AJAX category fetch from GeoCraft. */
+	const FETCH_CATEGORIES_NONCE_ACTION = 'geocraft_fetch_categories';
+
 	/** Admin page slug. */
 	const PAGE_SLUG = 'geocraft-settings';
 
@@ -38,6 +44,7 @@ class Geocraft_Settings {
 		add_action( 'admin_post_geocraft_save_settings', array( $this, 'handle_save' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
 		add_action( 'wp_ajax_geocraft_test_connection', array( $this, 'ajax_test_connection' ) );
+		add_action( 'wp_ajax_geocraft_fetch_categories', array( $this, 'ajax_fetch_categories' ) );
 	}
 
 	// -------------------------------------------------------------------------
@@ -89,16 +96,31 @@ class Geocraft_Settings {
 			true
 		);
 
+		$wp_categories = array_map(
+			function ( $cat ) {
+				return array(
+					'id'   => (int) $cat->term_id,
+					'name' => $cat->name,
+				);
+			},
+			get_categories( array( 'hide_empty' => false ) )
+		);
+
 		wp_localize_script(
 			'geocraft-admin',
 			'geocraftAdmin',
 			array(
-				'ajaxUrl'   => admin_url( 'admin-ajax.php' ),
-				'testNonce' => wp_create_nonce( self::TEST_NONCE_ACTION ),
-				'i18n'      => array(
-					'testing'  => __( 'Testing…', 'geocraft-plugin' ),
-					'success'  => __( 'Connection successful!', 'geocraft-plugin' ),
-					'error'    => __( 'Connection failed.', 'geocraft-plugin' ),
+				'ajaxUrl'        => admin_url( 'admin-ajax.php' ),
+				'testNonce'      => wp_create_nonce( self::TEST_NONCE_ACTION ),
+				'fetchCatNonce'  => wp_create_nonce( self::FETCH_CATEGORIES_NONCE_ACTION ),
+				'wpCategories'   => $wp_categories,
+				'i18n'           => array(
+					'testing'    => __( 'Testing…', 'geocraft-plugin' ),
+					'success'    => __( 'Connection successful!', 'geocraft-plugin' ),
+					'error'      => __( 'Connection failed.', 'geocraft-plugin' ),
+					'loading'    => __( 'Loading…', 'geocraft-plugin' ),
+					'loadError'  => __( 'Failed to load GeoCraft categories.', 'geocraft-plugin' ),
+					'remove'     => __( 'Remove', 'geocraft-plugin' ),
 				),
 			)
 		);
@@ -118,9 +140,10 @@ class Geocraft_Settings {
 			wp_die( esc_html__( 'You do not have permission to access this page.', 'geocraft-plugin' ) );
 		}
 
-		$settings = $this->get_settings();
-		$authors  = get_users( array( 'capability' => 'publish_posts', 'fields' => array( 'ID', 'display_name' ) ) );
-		$categories = get_categories( array( 'hide_empty' => false ) );
+		$settings          = $this->get_settings();
+		$taxonomy_mappings = $this->get_taxonomy_mappings();
+		$authors           = get_users( array( 'capability' => 'publish_posts', 'fields' => array( 'ID', 'display_name' ) ) );
+		$categories        = get_categories( array( 'hide_empty' => false ) );
 
 		include dirname( __FILE__, 2 ) . '/admin/views/settings-page.php';
 	}
@@ -172,6 +195,41 @@ class Geocraft_Settings {
 
 		update_option( self::OPTION_KEY, $current );
 
+		// Category mappings.
+		$category_map = array();
+		if ( isset( $_POST['geocraft_category_map'] ) && is_array( $_POST['geocraft_category_map'] ) ) {
+			foreach ( $_POST['geocraft_category_map'] as $row ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
+				$geo_cat = isset( $row['geocraft_cat'] ) ? sanitize_text_field( wp_unslash( $row['geocraft_cat'] ) ) : '';
+				if ( '' === $geo_cat ) {
+					continue;
+				}
+				$category_map[ $geo_cat ] = array(
+					'wp_term_id'  => isset( $row['wp_term_id'] ) ? absint( $row['wp_term_id'] ) : 0,
+					'auto_create' => ! empty( $row['auto_create'] ),
+				);
+			}
+		}
+
+		// Content type default tags.
+		$content_type_tags = array();
+		if ( isset( $_POST['geocraft_content_type'] ) && is_array( $_POST['geocraft_content_type'] ) ) {
+			foreach ( $_POST['geocraft_content_type'] as $row ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
+				$type = isset( $row['type'] ) ? sanitize_key( wp_unslash( $row['type'] ) ) : '';
+				if ( '' === $type ) {
+					continue;
+				}
+				$content_type_tags[ $type ] = isset( $row['tags'] ) ? sanitize_text_field( wp_unslash( $row['tags'] ) ) : '';
+			}
+		}
+
+		update_option(
+			self::TAXONOMY_OPTION_KEY,
+			array(
+				'category_map'      => $category_map,
+				'content_type_tags' => $content_type_tags,
+			)
+		);
+
 		wp_safe_redirect(
 			add_query_arg(
 				array(
@@ -210,9 +268,44 @@ class Geocraft_Settings {
 		wp_send_json_success( array( 'message' => __( 'Connection successful!', 'geocraft-plugin' ) ) );
 	}
 
+	/**
+	 * AJAX handler: fetch available categories from the GeoCraft platform.
+	 *
+	 * @return void
+	 */
+	public function ajax_fetch_categories() {
+		check_ajax_referer( self::FETCH_CATEGORIES_NONCE_ACTION, 'nonce' );
+
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error( array( 'message' => __( 'Permission denied.', 'geocraft-plugin' ) ), 403 );
+		}
+
+		$api    = new Geocraft_API();
+		$result = $api->get( '/categories' );
+
+		if ( is_wp_error( $result ) ) {
+			wp_send_json_error( array( 'message' => $result->get_error_message() ) );
+		}
+
+		wp_send_json_success( array( 'categories' => $result ) );
+	}
+
 	// -------------------------------------------------------------------------
 	// Helpers
 	// -------------------------------------------------------------------------
+
+	/**
+	 * Retrieve stored taxonomy mappings merged with defaults.
+	 *
+	 * @return array<string, mixed>
+	 */
+	public function get_taxonomy_mappings() {
+		$defaults = array(
+			'category_map'      => array(),
+			'content_type_tags' => array(),
+		);
+		return wp_parse_args( get_option( self::TAXONOMY_OPTION_KEY, array() ), $defaults );
+	}
 
 	/**
 	 * Retrieve stored settings merged with defaults.

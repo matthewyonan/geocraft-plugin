@@ -148,6 +148,115 @@ $has_token = ! empty( $settings['api_token'] );
 
 		</table>
 
+		<h2 class="title"><?php esc_html_e( 'Taxonomy Mapping', 'geocraft-plugin' ); ?></h2>
+		<p><?php esc_html_e( 'Map GeoCraft content categories to WordPress categories and set default tags per content type. Applied when a publish request does not include explicit categories or tags.', 'geocraft-plugin' ); ?></p>
+
+		<h3><?php esc_html_e( 'Category Mappings', 'geocraft-plugin' ); ?></h3>
+		<p>
+			<button type="button" id="geocraft-load-categories" class="button button-secondary">
+				<?php esc_html_e( 'Load GeoCraft Categories', 'geocraft-plugin' ); ?>
+			</button>
+			<span id="geocraft-load-cats-result" class="geocraft-test-result" aria-live="polite"></span>
+		</p>
+
+		<table id="geocraft-category-map-table" class="wp-list-table widefat fixed striped geocraft-mapping-table">
+			<thead>
+				<tr>
+					<th><?php esc_html_e( 'GeoCraft Category', 'geocraft-plugin' ); ?></th>
+					<th><?php esc_html_e( 'WordPress Category', 'geocraft-plugin' ); ?></th>
+					<th><?php esc_html_e( 'Auto-Create if Missing', 'geocraft-plugin' ); ?></th>
+					<th></th>
+				</tr>
+			</thead>
+			<tbody id="geocraft-category-map-body">
+				<?php foreach ( $taxonomy_mappings['category_map'] as $geo_cat => $entry ) : ?>
+					<tr class="geocraft-map-row">
+						<td>
+							<input
+								type="text"
+								name="geocraft_category_map[<?php echo esc_attr( $geo_cat ); ?>][geocraft_cat]"
+								value="<?php echo esc_attr( $geo_cat ); ?>"
+								class="regular-text"
+							>
+						</td>
+						<td>
+							<select name="geocraft_category_map[<?php echo esc_attr( $geo_cat ); ?>][wp_term_id]">
+								<option value="0"><?php esc_html_e( '— Select category —', 'geocraft-plugin' ); ?></option>
+								<?php foreach ( $categories as $category ) : ?>
+									<option value="<?php echo absint( $category->term_id ); ?>" <?php selected( (int) ( $entry['wp_term_id'] ?? 0 ), (int) $category->term_id ); ?>>
+										<?php echo esc_html( $category->name ); ?>
+									</option>
+								<?php endforeach; ?>
+							</select>
+						</td>
+						<td>
+							<input
+								type="checkbox"
+								name="geocraft_category_map[<?php echo esc_attr( $geo_cat ); ?>][auto_create]"
+								value="1"
+								<?php checked( ! empty( $entry['auto_create'] ) ); ?>
+							>
+						</td>
+						<td>
+							<button type="button" class="button button-small geocraft-remove-row">
+								<?php esc_html_e( 'Remove', 'geocraft-plugin' ); ?>
+							</button>
+						</td>
+					</tr>
+				<?php endforeach; ?>
+			</tbody>
+		</table>
+		<button type="button" id="geocraft-add-cat-row" class="button button-secondary geocraft-add-row" style="margin-top:8px;">
+			<?php esc_html_e( 'Add Row', 'geocraft-plugin' ); ?>
+		</button>
+
+		<h3 style="margin-top:24px;"><?php esc_html_e( 'Default Tags by Content Type', 'geocraft-plugin' ); ?></h3>
+		<p class="description">
+			<?php esc_html_e( 'Comma-separated tags applied when a published post matches the given content type and no tags are provided in the payload.', 'geocraft-plugin' ); ?>
+		</p>
+
+		<table id="geocraft-content-type-tags-table" class="wp-list-table widefat fixed striped geocraft-mapping-table">
+			<thead>
+				<tr>
+					<th><?php esc_html_e( 'Content Type', 'geocraft-plugin' ); ?></th>
+					<th><?php esc_html_e( 'Default Tags (comma-separated)', 'geocraft-plugin' ); ?></th>
+					<th></th>
+				</tr>
+			</thead>
+			<tbody id="geocraft-content-type-body">
+				<?php foreach ( $taxonomy_mappings['content_type_tags'] as $type => $tags_str ) : ?>
+					<tr class="geocraft-tag-row">
+						<td>
+							<input
+								type="text"
+								name="geocraft_content_type[<?php echo esc_attr( $type ); ?>][type]"
+								value="<?php echo esc_attr( $type ); ?>"
+								class="regular-text"
+								placeholder="<?php esc_attr_e( 'e.g. blog_post', 'geocraft-plugin' ); ?>"
+							>
+						</td>
+						<td>
+							<input
+								type="text"
+								name="geocraft_content_type[<?php echo esc_attr( $type ); ?>][tags]"
+								value="<?php echo esc_attr( $tags_str ); ?>"
+								class="large-text"
+								placeholder="<?php esc_attr_e( 'e.g. news, featured', 'geocraft-plugin' ); ?>"
+							>
+						</td>
+						<td>
+							<button type="button" class="button button-small geocraft-remove-row">
+								<?php esc_html_e( 'Remove', 'geocraft-plugin' ); ?>
+							</button>
+						</td>
+					</tr>
+				<?php endforeach; ?>
+			</tbody>
+		</table>
+		<button type="button" id="geocraft-add-tag-row" class="button button-secondary geocraft-add-row" style="margin-top:8px;">
+			<?php esc_html_e( 'Add Row', 'geocraft-plugin' ); ?>
+		</button>
+
 		<?php submit_button( __( 'Save Settings', 'geocraft-plugin' ) ); ?>
 	</form>
 </div>

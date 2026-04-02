@@ -21,5 +21,7 @@ class Geocraft_Plugin_Deactivator {
 	 */
 	public static function deactivate() {
 		// Intentionally keep persistent settings on deactivation.
+		require_once plugin_dir_path( __FILE__ ) . 'class-geocraft-analytics.php';
+		Geocraft_Analytics::unschedule_cron();
 	}
 }
