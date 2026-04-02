@@ -7,6 +7,10 @@
 
 defined( 'ABSPATH' ) || exit;
 
+if ( ! class_exists( 'Geocraft_SEO' ) ) {
+	require_once __DIR__ . '/class-geocraft-seo.php';
+}
+
 /**
  * Class Geocraft_Publisher
  */
@@ -18,18 +22,34 @@ class Geocraft_Publisher {
 	/** REST route path. */
 	const REST_ROUTE = '/publish';
 
+	/** Bulk REST route path. */
+	const REST_ROUTE_BULK = '/publish/bulk';
+
+	/** Maximum number of posts allowed in a single bulk request. */
+	const BULK_MAX_ITEMS = 50;
+
 	/** Post meta key used to map remote GeoCraft post IDs. */
 	const META_POST_ID = 'geocraft_post_id';
 
 	/**
-	 * Constructor.
+	 * SEO manager.
+	 *
+	 * @var Geocraft_SEO
 	 */
-	public function __construct() {
+	private $seo_manager;
+
+	/**
+	 * Constructor.
+	 *
+	 * @param Geocraft_SEO|null $seo_manager Optional SEO manager for testing.
+	 */
+	public function __construct( $seo_manager = null ) {
+		$this->seo_manager = $seo_manager instanceof Geocraft_SEO ? $seo_manager : new Geocraft_SEO();
 		add_action( 'rest_api_init', array( $this, 'register_routes' ) );
 	}
 
 	/**
-	 * Register GeoCraft publishing route.
+	 * Register GeoCraft publishing routes.
 	 *
 	 * @return void
 	 */
@@ -40,6 +60,16 @@ class Geocraft_Publisher {
 			array(
 				'methods'             => 'POST',
 				'callback'            => array( $this, 'handle_publish' ),
+				'permission_callback' => array( $this, 'authorize_request' ),
+			)
+		);
+
+		register_rest_route(
+			self::REST_NAMESPACE,
+			self::REST_ROUTE_BULK,
+			array(
+				'methods'             => 'POST',
+				'callback'            => array( $this, 'handle_bulk_publish' ),
 				'permission_callback' => array( $this, 'authorize_request' ),
 			)
 		);
@@ -100,6 +130,100 @@ class Geocraft_Publisher {
 			);
 		}
 
+		$result = $this->publish_single_post( $payload );
+		if ( is_wp_error( $result ) ) {
+			return $result;
+		}
+
+		return new WP_REST_Response( $result['data'], $result['http_status'] );
+	}
+
+	/**
+	 * Handle bulk publish endpoint request.
+	 *
+	 * Accepts an array of post payloads (max 50) and processes each sequentially.
+	 * Returns a per-item result array — failures do not halt the batch.
+	 *
+	 * @param mixed $request REST request object.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function handle_bulk_publish( $request ) {
+		$payloads = method_exists( $request, 'get_json_params' ) ? $request->get_json_params() : null;
+
+		if ( ! is_array( $payloads ) ) {
+			return new WP_Error(
+				'geocraft_invalid_payload',
+				__( 'Request body must be a JSON array of post payloads.', 'geocraft-plugin' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		// Reject associative objects (single post sent to bulk endpoint).
+		if ( ! empty( $payloads ) && ! isset( $payloads[0] ) ) {
+			return new WP_Error(
+				'geocraft_invalid_payload',
+				__( 'Request body must be a JSON array of post payloads.', 'geocraft-plugin' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		if ( count( $payloads ) > self::BULK_MAX_ITEMS ) {
+			return new WP_Error(
+				'geocraft_bulk_limit_exceeded',
+				sprintf(
+					/* translators: %d: maximum allowed items */
+					__( 'Bulk request exceeds the maximum of %d posts per request.', 'geocraft-plugin' ),
+					self::BULK_MAX_ITEMS
+				),
+				array( 'status' => 400 )
+			);
+		}
+
+		$results = array();
+		foreach ( $payloads as $index => $payload ) {
+			if ( ! is_array( $payload ) ) {
+				$results[] = array(
+					'index'   => $index,
+					'success' => false,
+					'error'   => array(
+						'code'    => 'geocraft_invalid_item',
+						'message' => __( 'Each item must be a JSON object.', 'geocraft-plugin' ),
+					),
+				);
+				continue;
+			}
+
+			$result = $this->publish_single_post( $payload );
+			if ( is_wp_error( $result ) ) {
+				$results[] = array(
+					'index'   => $index,
+					'success' => false,
+					'error'   => array(
+						'code'    => $result->get_error_code(),
+						'message' => $result->get_error_message(),
+					),
+				);
+			} else {
+				$results[] = array(
+					'index'   => $index,
+					'success' => true,
+					'data'    => $result['data'],
+				);
+			}
+		}
+
+		return new WP_REST_Response( $results, 200 );
+	}
+
+	/**
+	 * Publish or update a single post from a payload array.
+	 *
+	 * Shared by handle_publish and handle_bulk_publish.
+	 *
+	 * @param array<string, mixed> $payload Post payload.
+	 * @return array{data: array<string, mixed>, http_status: int}|WP_Error
+	 */
+	private function publish_single_post( array $payload ) {
 		$prepared = $this->prepare_post_args( $payload );
 		if ( is_wp_error( $prepared ) ) {
 			return $prepared;
@@ -149,17 +273,17 @@ class Geocraft_Publisher {
 			}
 		}
 
-		$response = new WP_REST_Response(
-			array(
+		$this->seo_manager->apply_seo_meta( $wp_post_id, $payload );
+
+		return array(
+			'data'        => array(
 				'post_id'   => $wp_post_id,
 				'permalink' => get_permalink( $wp_post_id ),
 				'status'    => get_post_status( $wp_post_id ),
 				'operation' => $operation,
 			),
-			'created' === $operation ? 201 : 200
+			'http_status' => 'created' === $operation ? 201 : 200,
 		);
-
-		return $response;
 	}
 
 	/**
