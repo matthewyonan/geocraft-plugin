@@ -76,10 +76,19 @@ class Geocraft_Plugin {
 	/**
 	 * Loads translation files.
 	 *
+	 * Since WordPress 4.6+, translations for plugins hosted on WordPress.org
+	 * are loaded automatically. This is retained only for custom translation
+	 * files shipped directly with the plugin.
+	 *
 	 * @return void
 	 */
 	public function load_textdomain() {
-		load_plugin_textdomain( 'geocraft-plugin', false, dirname( plugin_basename( __FILE__ ) ) . '/../languages' );
+		// Automatic translations are handled by WordPress 4.6+ for wp.org hosted plugins.
+		// Only load custom translation files if they exist in the languages directory.
+		$mofile = dirname( plugin_basename( __FILE__ ) ) . '/../languages/geocraft-plugin-' . determine_locale() . '.mo';
+		if ( file_exists( WP_PLUGIN_DIR . '/' . $mofile ) ) {
+			load_textdomain( 'geocraft-plugin', WP_PLUGIN_DIR . '/' . $mofile );
+		}
 	}
 
 	/**

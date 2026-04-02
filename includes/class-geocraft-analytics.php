@@ -305,7 +305,7 @@ class Geocraft_Analytics {
 				sprintf(
 					/* translators: %d: number of pending events */
 					esc_html__( '%d event(s) pending sync.', 'geocraft-plugin' ),
-					$pending
+					absint( $pending )
 				) .
 				'</p>';
 		}
