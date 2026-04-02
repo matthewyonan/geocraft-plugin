@@ -81,6 +81,33 @@ if ( ! class_exists( 'Geocraft_Settings' ) ) {
 	}
 }
 
+if ( ! class_exists( 'Geocraft_SEO' ) ) {
+	class Geocraft_SEO {
+		public function apply_seo_meta( $post_id, $payload ) {
+			// no-op stub.
+		}
+	}
+}
+
+/**
+ * Minimal REST request stub for unit testing bulk/publish handlers.
+ */
+class MockRestRequest {
+	/** @var mixed */
+	private $json_params;
+
+	/**
+	 * @param mixed $json_params Value returned by get_json_params().
+	 */
+	public function __construct( $json_params ) {
+		$this->json_params = $json_params;
+	}
+
+	public function get_json_params() {
+		return $this->json_params;
+	}
+}
+
 require_once dirname( __DIR__, 2 ) . '/includes/class-geocraft-publisher.php';
 
 /**
@@ -141,6 +168,90 @@ class GeocraftPublisherTest extends TestCase {
 	public function test_empty_status_falls_back_to_default_status() {
 		$status = $this->invoke_private( 'sanitize_post_status', array( '' ) );
 		$this->assertSame( 'draft', $status );
+	}
+
+	// -------------------------------------------------------------------------
+	// Bulk publish endpoint — validation tests
+	// -------------------------------------------------------------------------
+
+	public function test_bulk_publish_rejects_null_body() {
+		$request = new MockRestRequest( null );
+		$result  = $this->publisher->handle_bulk_publish( $request );
+
+		$this->assertInstanceOf( WP_Error::class, $result );
+		$this->assertSame( 'geocraft_invalid_payload', $result->get_error_code() );
+	}
+
+	public function test_bulk_publish_rejects_string_body() {
+		$request = new MockRestRequest( 'not-an-array' );
+		$result  = $this->publisher->handle_bulk_publish( $request );
+
+		$this->assertInstanceOf( WP_Error::class, $result );
+		$this->assertSame( 'geocraft_invalid_payload', $result->get_error_code() );
+	}
+
+	public function test_bulk_publish_rejects_associative_object_body() {
+		// A single post object sent to the bulk endpoint should be rejected.
+		$request = new MockRestRequest( array( 'title' => 'Hello', 'body' => 'World', 'post_status' => 'draft' ) );
+		$result  = $this->publisher->handle_bulk_publish( $request );
+
+		$this->assertInstanceOf( WP_Error::class, $result );
+		$this->assertSame( 'geocraft_invalid_payload', $result->get_error_code() );
+	}
+
+	public function test_bulk_publish_rejects_more_than_50_items() {
+		$payloads = array_fill( 0, 51, array( 'title' => 'T', 'body' => 'B', 'post_status' => 'draft' ) );
+		$request  = new MockRestRequest( $payloads );
+		$result   = $this->publisher->handle_bulk_publish( $request );
+
+		$this->assertInstanceOf( WP_Error::class, $result );
+		$this->assertSame( 'geocraft_bulk_limit_exceeded', $result->get_error_code() );
+	}
+
+	public function test_bulk_publish_accepts_exactly_50_items_without_limit_error() {
+		// Exactly 50 items should pass the limit check (individual items will fail
+		// later due to missing WP functions, but the limit error must NOT fire).
+		$payloads = array_fill( 0, 50, array( 'title' => 'T', 'body' => 'B', 'post_status' => 'draft' ) );
+		$request  = new MockRestRequest( $payloads );
+		$result   = $this->publisher->handle_bulk_publish( $request );
+
+		// The limit guard must not return a WP_Error for exactly 50 items.
+		if ( is_wp_error( $result ) ) {
+			$this->assertNotSame( 'geocraft_bulk_limit_exceeded', $result->get_error_code() );
+		} else {
+			// If WP functions are not available the result will still be a response object.
+			$this->assertNotInstanceOf( WP_Error::class, $result );
+		}
+	}
+
+	public function test_bulk_publish_returns_empty_array_for_empty_input() {
+		$request = new MockRestRequest( array() );
+		$result  = $this->publisher->handle_bulk_publish( $request );
+
+		// An empty payload list is valid; no items to process.
+		$this->assertNotInstanceOf( WP_Error::class, $result );
+	}
+
+	public function test_bulk_publish_records_failure_for_non_array_item() {
+		// A list containing a non-object entry should record a per-item error.
+		$request = new MockRestRequest( array( 'not-an-object' ) );
+		$result  = $this->publisher->handle_bulk_publish( $request );
+
+		$this->assertNotInstanceOf( WP_Error::class, $result );
+		// Result is a WP_REST_Response — inspect the data property directly.
+		$data = $result->data ?? null;
+		$this->assertIsArray( $data );
+		$this->assertCount( 1, $data );
+		$this->assertFalse( $data[0]['success'] );
+		$this->assertSame( 'geocraft_invalid_item', $data[0]['error']['code'] );
+	}
+
+	public function test_bulk_max_items_constant_is_50() {
+		$this->assertSame( 50, Geocraft_Publisher::BULK_MAX_ITEMS );
+	}
+
+	public function test_bulk_route_constant_is_publish_bulk() {
+		$this->assertSame( '/publish/bulk', Geocraft_Publisher::REST_ROUTE_BULK );
 	}
 
 	/**
